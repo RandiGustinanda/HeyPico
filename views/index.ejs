@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HeyPico - LLM to Google Maps</title>
+</head>
+<body>
+  <h1>HeyPico.ai Demo</h1>
+  <form id="askForm">
+    <input type="text" id="question" placeholder="Coba ketik: Tempat makan enak di Bandung" size="50">
+    <button type="submit">Tanya</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script>
+    document.getElementById('askForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const q = document.getElementById('question').value;
+      const res = await fetch('/ask?q=' + encodeURIComponent(q));
+      const data = await res.json();
+
+      const result = document.getElementById('result');
+      result.innerHTML = '<h3>Jawaban LLM:</h3><p>' + data.llm_answer + '</p><h4>Tempat yang ditemukan:</h4>';
+      const list = document.createElement('ul');
+
+      data.places.forEach(place => {
+        const li = document.createElement('li');
+        li.innerHTML = '<a href="' + place.maps_link + '" target="_blank">' + place.name + '</a>';
+        list.appendChild(li);
+      });
+
+      result.appendChild(list);
+    });
+  </script>
+</body>
+</html>
