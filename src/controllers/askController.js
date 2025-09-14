@@ -3,22 +3,23 @@ import { extractPlacesAndLinks } from '../utils/mapsHelper.js';
 
 export async function handleAsk(req, res) {
   const question = req.query.q;
-
-  if (!question) {
-    return res.status(400).json({ error: 'Missing query parameter: q' });
-  }
+  if (!question) return res.redirect('/');
 
   try {
-    const llmAnswer = await askOllama(question);
-    const places = extractPlacesAndLinks(llmAnswer);
+    console.log('[ASK]', question); 
 
-    res.json({
-      prompt: question,
+    const llmAnswer = await askOllama(question); 
+    console.log('[LLM ANSWER]', llmAnswer); 
+
+    const places = extractPlacesAndLinks(llmAnswer); 
+    console.log('[PLACES]', places); 
+
+    res.render('index', {
       llm_answer: llmAnswer,
-      places,
+      places
     });
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ error: 'Internal server error' });
+  } catch (error) {
+    console.error('[ERROR]', error); 
+    res.status(500).send('Terjadi kesalahan'); 
   }
 }

@@ -1,37 +1,41 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>HeyPico - LLM to Google Maps</title>
+  <title>HeyPico LLM + Maps</title>
+  <script>
+    function showLoading() {
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('submitBtn').disabled = true;
+    }
+  </script>
 </head>
 <body>
-  <h1>HeyPico.ai Demo</h1>
-  <form id="askForm">
-    <input type="text" id="question" placeholder="Coba ketik: Tempat makan enak di Bandung" size="50">
-    <button type="submit">Tanya</button>
+  <h1>Temukan Tempat dengan AI + Google Maps</h1>
+
+  <form method="get" action="/ask" onsubmit="showLoading()">
+    <input type="text" name="q" placeholder="Contoh: Tempat makan enak di Bandung" size="40" required />
+    <button type="submit" id="submitBtn">Cari</button>
   </form>
 
-  <div id="result"></div>
+  <div id="loading" style="display:none; margin-top: 20px;">
+    <strong>⏳ Sedang mencari tempat dengan bantuan AI...</strong>
+  </div>
 
-  <script>
-    document.getElementById('askForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const q = document.getElementById('question').value;
-      const res = await fetch('/ask?q=' + encodeURIComponent(q));
-      const data = await res.json();
+  <% if (llm_answer) { %>
+    <h2>Jawaban dari AI:</h2>
+    <p><%= llm_answer %></p>
+  <% } %>
 
-      const result = document.getElementById('result');
-      result.innerHTML = '<h3>Jawaban LLM:</h3><p>' + data.llm_answer + '</p><h4>Tempat yang ditemukan:</h4>';
-      const list = document.createElement('ul');
-
-      data.places.forEach(place => {
-        const li = document.createElement('li');
-        li.innerHTML = '<a href="' + place.maps_link + '" target="_blank">' + place.name + '</a>';
-        list.appendChild(li);
-      });
-
-      result.appendChild(list);
-    });
-  </script>
+  <% if (places && places.length > 0) { %>
+    <h2>Tempat yang Direkomendasikan:</h2>
+    <ul>
+      <% places.forEach(function(place) { %>
+        <li>
+          <strong><%= place.name %></strong><br>
+          <a href="<%= place.maps_link %>" target="_blank">📍 Buka di Google Maps</a>
+        </li>
+      <% }); %>
+    </ul>
+  <% } %>
 </body>
 </html>
